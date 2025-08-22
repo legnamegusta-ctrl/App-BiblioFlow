@@ -1,8 +1,8 @@
 
-export function initPage(app){
-  const books = app.getBooks();
-  const readings = app.getReadings();
-  const metas = app.getMetas();
+export async function initPage(app){
+  const books = await app.getBooks();
+  const readings = await app.getReadings();
+  const metas = await app.getMetas();
   const autores = new Set(books.map(b=>b.autor)).size;
   const streak = app.getStreak().current;
   document.getElementById('stat-livros').textContent = books.length;
