@@ -1,11 +1,11 @@
 
 import { uid } from '../js/utils.js';
-export function initPage(app){
+export async function initPage(app){
   const lista = document.getElementById('lista');
   const btnAdd = document.getElementById('btn-add');
 
-  function render(){
-    const metas = app.getMetas();
+  async function render(){
+    const metas = await app.getMetas();
     lista.innerHTML = metas.map(m=> card(m)).join('') || '<div class="badge">Nenhuma meta.</div>';
     lista.querySelectorAll('[data-edit]').forEach(btn => btn.addEventListener('click', ()=> openForm(btn.dataset.id)));
   }
@@ -24,8 +24,8 @@ export function initPage(app){
     </div>`;
   }
 
-  function openForm(id){
-    const all = app.getMetas();
+  async function openForm(id){
+    const all = await app.getMetas();
     const draft = app.pullMetaDraft();
     let meta = all.find(x=>x.id===id) || { id: uid('m'), tipo:'numero', titulo:'', desc:'', qtd:10, periodo:'2025', livro:'', prazo:'' , checklist:['']};
     if(draft){
@@ -82,8 +82,8 @@ export function initPage(app){
     }));
     el.querySelector('#btn-cancel').addEventListener('click', modal.close);
     const del = el.querySelector('#btn-del');
-    if(del) del.addEventListener('click', ()=>{
-      if(confirm('Excluir meta?')){ app.setMetas(all.filter(x=>x.id!==meta.id)); modal.close(); render(); app.toast('Meta excluída'); }
+    if(del) del.addEventListener('click', async ()=>{
+      if(confirm('Excluir meta?')){ await app.setMetas(all.filter(x=>x.id!==meta.id)); modal.close(); await render(); app.toast('Meta excluída'); }
     });
     const boxCL = el.querySelector('#checklist-box');
     const addCL = el.querySelector('#btn-add-check');
@@ -96,7 +96,7 @@ export function initPage(app){
         const row = e.target.closest('.row'); row.remove();
       }
     });
-    el.querySelector('#frm').addEventListener('submit', (ev)=>{
+    el.querySelector('#frm').addEventListener('submit', async (ev)=>{
       ev.preventDefault();
       const updated = { ...meta };
       updated.titulo = el.querySelector('#f-titulo').value.trim();
@@ -112,13 +112,13 @@ export function initPage(app){
       }else{
         updated.checklist = Array.from(boxCL.querySelectorAll('input')).map(i=> i.value.trim()).filter(Boolean);
       }
-      const arr = app.getMetas();
+      const arr = await app.getMetas();
       const idx = arr.findIndex(x=>x.id===updated.id);
       if(idx>=0) arr[idx]=updated; else arr.unshift(updated);
-      app.setMetas(arr); modal.close(); render(); app.toast('Salvo');
+      await app.setMetas(arr); modal.close(); await render(); app.toast('Salvo');
     });
   }
 
   btnAdd.addEventListener('click', ()=> openForm());
-  render();
+  await render();
 }
