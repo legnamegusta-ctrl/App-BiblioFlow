@@ -1,0 +1,30 @@
+
+<section class="section">
+  <div class="section-head">
+    <div class="h2">Calculadora de Leitura</div>
+    <div class="actions"><button class="btn btn-cta" id="btn-criar-meta">Criar Meta</button></div>
+  </div>
+  <div class="card grid">
+    <div class="row">
+      <button class="btn btn-ghost" id="modo-pd">Páginas por dia</button>
+      <button class="btn btn-ghost" id="modo-df">Data final</button>
+    </div>
+    <div class="field">
+      <label class="label">Número de páginas</label>
+      <input id="paginas" type="number" class="input" value="300">
+    </div>
+    <div class="field" id="fld-pd">
+      <label class="label">Páginas por dia</label>
+      <input id="porDia" type="number" class="input" value="20">
+    </div>
+    <div class="field hidden" id="fld-df">
+      <label class="label">Prazo (em dias)</label>
+      <input id="prazo" type="number" class="input" value="10">
+    </div>
+    <div class="card">
+      <div class="h2" style="font-size:16px">Resultado</div>
+      <div id="res-label"></div>
+      <div class="badge" id="res-extra"></div>
+    </div>
+  </div>
+</section>

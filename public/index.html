@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>BiblioFlow</title>
+  <link rel="stylesheet" href="./css/styles.css"/>
+  <link rel="manifest" href="./manifest.json"/>
+  <meta name="theme-color" content="#1c2c4f"/>
+  <link rel="icon" href="./assets/favicon.ico"/>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="inner">
+      <div class="brand" id="brand" title="Voltar ao Dashboard">
+        <img src="./assets/logo.png" onerror="this.src=''; this.outerHTML='<span>📚</span>'" alt="BiblioFlow" style="height:28px;border-radius:8px;border:1px solid rgba(255,255,255,.12)"/>
+        <span>BiblioFlow</span>
+      </div>
+      <div class="row">
+        <button class="iconbtn" id="btn-timer" title="Temporizador">⏱️</button>
+        <button class="iconbtn" id="btn-streaks" title="Streaks">🔥</button>
+        <div class="menu">
+          <button class="iconbtn" id="btn-menu" title="Menu">⚙️</button>
+          <div class="menu-panel hidden" id="menu-panel">
+            <button class="menu-item" id="menu-perfil">👤 Perfil</button>
+            <button class="menu-item" id="menu-config">⚙️ Configurações</button>
+            <button class="menu-item" id="menu-tema">🌗 Alternar tema</button>
+            <div class="menu-item danger" id="menu-sair">⎋ Sair</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+    <div id="page"></div>
+  </main>
+
+  <nav class="bottomnav">
+    <div class="inner">
+      <button class="navbtn" data-route="acervo">📚<span class="badge">Acervo</span></button>
+      <button class="navbtn" data-route="leituras">✒️<span class="badge">Leituras</span></button>
+      <button class="navbtn" data-route="metas">🎯<span class="badge">Metas</span></button>
+      <button class="navbtn" data-route="calculadora">🧮<span class="badge">Calculadora</span></button>
+      <button class="navbtn" data-route="comunidade">💬<span class="badge">Comunidade</span></button>
+    </div>
+  </nav>
+
+  <div id="toast" class="toast hidden"><div></div></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc, collection, getDocs, setDoc, query, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { BiblioFlow } from './js/app.js';
+
+// Preencha com sua configuração do Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyAY5PeVkEKLt0gwF8nWfN7iKUfvgmjLEgw",
+  authDomain: "biblioflow.firebaseapp.com",
+  projectId: "biblioflow",
+  storageBucket: "biblioflow.firebasestorage.app",
+  messagingSenderId: "367929491807",
+  appId: "1:367929491807:web:b7ccb01941a3734773f6ea"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    document.getElementById('brand').style.display = 'flex';
+    document.querySelector('.bottomnav').style.display = 'grid';
+    document.getElementById('menu-sair').style.display = 'flex';
+    document.getElementById('menu-perfil').style.display = 'flex';
+    document.getElementById('menu-config').style.display = 'flex';
+    await BiblioFlow.init(db, user.uid);
+  } else {
+    document.getElementById('brand').style.display = 'none';
+    document.querySelector('.bottomnav').style.display = 'none';
+    document.getElementById('menu-sair').style.display = 'none';
+    document.getElementById('menu-perfil').style.display = 'none';
+    document.getElementById('menu-config').style.display = 'none';
+    await BiblioFlow.init(db, null);
+  }
+});
+</script>
+
+<script type="module" src="./js/app.js"></script>
+</body>
+</html>
