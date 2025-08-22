@@ -1,4 +1,3 @@
-
 import { computeDays, computePagesPerDay } from '../js/utils.js';
 const out = document.getElementById('out');
 function log(msg){ out.textContent += msg + '\n'; }
@@ -8,5 +7,7 @@ try{
   assertEq(computeDays(0,10), 1, 'computeDays min 1 day');
   assertEq(computePagesPerDay(100,10), 10, 'ppd 100/10');
   assertEq(computePagesPerDay(100,0), 100, 'days=0 treated as 1');
+  assertEq(computePagesPerDay(0,10), 0, 'ppd 0/10');
   log('All tests passed ✔️');
 }catch(e){ log('Test failed ❌: ' + e.message); }
+
