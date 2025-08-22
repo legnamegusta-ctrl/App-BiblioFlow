@@ -1,10 +1,10 @@
-import { computeDays, computePagesPerDay, store, uid, formatDate, firestore } from './utils.js';
+import { store, firestore } from './utils.js';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const routes = ['dashboard','acervo','leituras','metas','calculadora','temporizador','comunidade','streaks','perfil','configuracoes'];
 let db, uid;
 
-const BiblioFlow = {
+export const BiblioFlow = {
   state: { toastTimer: null },
   data: {
     booksKey: 'bf_books',
@@ -59,6 +59,8 @@ const BiblioFlow = {
   async init(firebaseDb, firebaseUid){
     db = firebaseDb;
     uid = firebaseUid;
+    this.db = db;
+    this.uid = uid;
     await loadRoute();
     updateNavBadges();
   }
@@ -120,5 +122,3 @@ window.addEventListener('DOMContentLoaded', ()=>{
 if ('serviceWorker' in navigator){
   navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }
-
-window.BiblioFlow = BiblioFlow;
