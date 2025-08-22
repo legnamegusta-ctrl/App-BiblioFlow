@@ -6,8 +6,8 @@ export function computeDays(paginas, porDia){
 }
 export function computePagesPerDay(paginas, dias){
   const p = Math.max(0, Number(paginas)||0);
-  const d = Math.max(1, Number(dias)||1);
-  return Math.max(1, Math.ceil(p/d));
+  const d = Math.max(1, Number(dias)||0);
+  return p === 0 ? 0 : Math.max(1, Math.ceil(p/d));
 }
 export const store = {
   get(key, fallback){
@@ -42,3 +42,4 @@ export const firestore = {
     await deleteDoc(doc(db, 'users', uid, collectionName, id));
   }
 };
+
