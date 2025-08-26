@@ -1,8 +1,8 @@
-HEAD
 import {
   getFirestore,
   collection,
   doc,
+  getDoc,
   getDocs,
   addDoc,
   updateDoc,
@@ -22,7 +22,6 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 // Utils & storage
-import { collection, query, getDocs, setDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 export function computeDays(paginas, porDia){
   const p = Math.max(0, Number(paginas)||0);
   const d = Math.max(1, Number(porDia)||0);
@@ -127,17 +126,6 @@ const auth = {
   updateProfile: async (app, newProfile) => {
     await updateProfile(app.auth.currentUser, newProfile);
   }
-};
-
-const uid = () => {
-  let a = new Uint32Array(3);
-  window.crypto.getRandomValues(a);
-  return (
-    performance.now().toString(36) +
-    Array.from(a)
-    .map((d) => d.toString(36))
-    .join("")
-  ).replace(/\./g, "");
 };
 
 export {
