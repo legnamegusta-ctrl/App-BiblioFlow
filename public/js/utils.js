@@ -10,17 +10,25 @@ export function computePagesPerDay(paginas, dias){
   const d = Math.max(1, Number(dias)||0);
   return p === 0 ? 0 : Math.max(1, Math.ceil(p/d));
 }
-export const store = {
+// Simple wrapper around localStorage with JSON handling.
+// Exported explicitly at the end of the file to avoid tree-shaking
+// issues that could cause the module loader to think the export is
+// missing (which led to "does not provide an export named 'store'").
+const store = {
   get(key, fallback){
     try{
       const v = localStorage.getItem(key);
       return v ? JSON.parse(v) : structuredClone(fallback);
-    }catch{ return structuredClone(fallback); }
+    }catch{
+      return structuredClone(fallback);
+    }
   },
   set(key, val){
     localStorage.setItem(key, JSON.stringify(val));
   }
 };
+
+export { store };
 export function uid(prefix='id'){ return prefix + '_' + Math.random().toString(36).slice(2,9); }
 export function formatDate(d){ try{ return new Date(d).toISOString().slice(0,10); }catch{ return d; } }
 
