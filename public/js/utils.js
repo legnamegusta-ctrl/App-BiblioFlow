@@ -1,5 +1,4 @@
 import {
-  getFirestore,
   collection,
   doc,
   getDoc,
@@ -7,18 +6,15 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
-  query,
-  where,
-  limit
+  query
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {
-  getAuth,
   onAuthStateChanged,
   signInWithPopup,
   GoogleAuthProvider,
   signOut,
   deleteUser,
-  updateProfile
+  updateProfile as fbUpdateProfile
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 // Utils & storage
@@ -124,12 +120,11 @@ const auth = {
   },
   // Nova função para atualizar o perfil do usuário
   updateProfile: async (app, newProfile) => {
-    await updateProfile(app.auth.currentUser, newProfile);
+    await fbUpdateProfile(app.auth.currentUser, newProfile);
   }
 };
 
 export {
   firestore,
-  auth,
-  uid
-};
+  auth
+}; // uid is exported above
