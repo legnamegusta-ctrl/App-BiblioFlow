@@ -1,3 +1,4 @@
+import { streakStatus, statusMilestones } from '../js/utils.js';
 
 export async function initPage(app){
   const books = await app.getBooks();
@@ -10,12 +11,22 @@ export async function initPage(app){
     const el = document.getElementById(id);
     if (el) el.textContent = text;
   };
+  
+  function getStatusName(days){
+    if (days < 3) return 'Iniciante';
+    if (days >= 365) return 'Imortal';
+    
+    let index = statusMilestones.findLastIndex(milestone => days >= milestone);
+    if (index === -1) index = 0;
 
+    return streakStatus[index];
+  }
+
+  setText('stat-streak', `🔥 ${streak} dias - ${getStatusName(streak)}`);
   setText('stat-livros', books.length);
   setText('stat-leituras', readings.length);
   setText('stat-autores', autores);
   setText('stat-metas', metas.length);
-  setText('stat-streak', '🔥 '+streak);
 
   // Extras
   const tempoH = (readings.length * 1.2).toFixed(1); // estimativa

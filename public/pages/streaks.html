@@ -1,11 +1,25 @@
-
 <section class="section">
   <div class="section-head"><div class="h2">Streaks (Sequência)</div></div>
   <div class="card">
     <div class="badge">Sua sequência atual</div>
     <div id="streak-text" style="font-size:28px; font-weight:800; color:var(--bf-primary)">🔥 0 dias</div>
-    <div id="grid" class="row" style="gap:8px; margin:10px 0"></div>
-    <div id="badges" class="row" style="gap:8px; margin:10px 0"></div>
     <button class="btn btn-cta" id="btn-registrar">Registrar Leitura Diária</button>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <div class="badge">Seu status</div>
+    <div id="status-text" style="font-size:20px; font-weight:700">Iniciante</div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <div class="badge">Histórico (últimos 21 dias)</div>
+    <div class="row" style="justify-content:space-between; margin-bottom:10px;">
+      <button class="iconbtn" id="btn-prev-month"> &lt; </button>
+      <span style="font-weight:600" id="mes-ano"></span>
+      <button class="iconbtn" id="btn-next-month"> &gt; </button>
+    </div>
+    <div id="grid" class="calendario-grid"></div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <div class="badge">Colecionador de Medalhas</div>
+    <div id="medalhas-grid" class="medalhas-grid"></div>
   </div>
 </section>

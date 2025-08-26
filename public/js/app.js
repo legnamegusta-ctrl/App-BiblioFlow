@@ -3,6 +3,7 @@ import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "https://w
 
 const routes = ['dashboard','acervo','leituras','metas','calculadora','temporizador','comunidade','streaks','perfil','configuracoes'];
 let db, uid;
+let deferredPrompt;
 
 export const BiblioFlow = {
   state: { toastTimer: null },
@@ -27,7 +28,7 @@ export const BiblioFlow = {
   async setReadings(v){ for(let reading of v){ await firestore.set(db, uid, 'readings', reading.id, reading); } },
   async getMetas(){ return await firestore.getAll(db, uid, 'metas'); },
   async setMetas(v){ for(let meta of v){ await firestore.set(db, uid, 'metas', meta.id, meta); } },
-  getStreak(){ return store.get(this.data.streakKey, {current:8, history: Array.from({length:21}, (_,i)=> i<8)} ); },
+  getStreak(){ return store.get(this.data.streakKey, {current:0, dates: [], lastRegisteredDate: ''} ); },
   setStreak(v){ store.set(this.data.streakKey, v); },
   setMetaDraft(obj){ store.set(this.data.draftKey, obj); },
   pullMetaDraft(){ const v = store.get(this.data.draftKey, null); localStorage.removeItem(this.data.draftKey); return v; },
@@ -61,8 +62,10 @@ export const BiblioFlow = {
     uid = firebaseUid;
     this.db = db;
     this.uid = uid;
-    await loadRoute();
-    updateNavBadges();
+    if (uid) {
+        await loadRoute();
+        updateNavBadges();
+    }
   }
 };
 
@@ -84,9 +87,20 @@ async function loadRoute(){
   if (typeof mod.initPage === 'function'){
     mod.initPage(BiblioFlow);
   }
+
+  // PWA install button logic
+  const pwaCard = document.getElementById('card-pwa');
+  if(pwaCard){
+    if(deferredPrompt){
+      pwaCard.classList.remove('hidden');
+    }else{
+      pwaCard.classList.add('hidden');
+    }
+  }
 }
 
 async function updateNavBadges(){
+  if (!uid) return;
   const metas = await BiblioFlow.getMetas();
   const overdue = metas.filter(m=> m.tipo==='prazo' && m.prazo && new Date(m.prazo) < new Date() && !m.concluida).length;
   document.querySelectorAll('.navbtn').forEach(btn=>{
@@ -98,7 +112,12 @@ async function updateNavBadges(){
   });
 }
 
-window.addEventListener('hashchange', ()=>{ loadRoute(); updateNavBadges(); });
+window.addEventListener('hashchange', ()=>{ 
+    if (uid) {
+        loadRoute();
+        updateNavBadges();
+    }
+});
 window.addEventListener('DOMContentLoaded', ()=>{
   document.body.classList.toggle('light', (localStorage.getItem('bf_theme')||'dark')==='light');
   document.getElementById('brand').addEventListener('click', ()=> BiblioFlow.navTo('dashboard'));
@@ -115,10 +134,26 @@ window.addEventListener('DOMContentLoaded', ()=>{
     signOut(getAuth()).then(() => BiblioFlow.toast('Desconectado'));
   });
   document.querySelectorAll('.navbtn').forEach(btn=> btn.addEventListener('click', ()=> BiblioFlow.navTo(btn.dataset.route)));
-
-  loadRoute(); updateNavBadges();
 });
 
+// PWA: register service worker
 if ('serviceWorker' in navigator){
   navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }
+
+// PWA: install prompt logic
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const pwaCard = document.getElementById('card-pwa');
+  if(pwaCard) pwaCard.classList.remove('hidden');
+});
+
+window.addEventListener('appinstalled', (e) => {
+  deferredPrompt = null;
+  const pwaCard = document.getElementById('card-pwa');
+  if(pwaCard) pwaCard.classList.add('hidden');
+  console.log('App instalado com sucesso!');
+});
+
+window.BiblioFlow = BiblioFlow;

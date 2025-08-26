@@ -1,0 +1,15 @@
+{
+  "name": "BiblioFlow",
+  "short_name": "BiblioFlow",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#1c2c4f",
+  "theme_color": "#1c2c4f",
+  "icons": [
+    {
+      "src": "assets/favicon.ico",
+      "sizes": "48x48 64x64",
+      "type": "image/x-icon"
+    }
+  ]
+}

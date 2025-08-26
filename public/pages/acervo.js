@@ -132,18 +132,23 @@ export function initPage(app){
       const updated = {
         ...book,
         titulo: el.querySelector('#f-titulo').value.trim(),
-        autor: el.querySelector('#f-autor').value.trim(),
-        editora: el.querySelector('#f-editora').value.trim(),
-        edicao: el.querySelector('#f-edicao').value.trim(),
-        ano: el.querySelector('#f-ano').value.trim(),
-        paginas: Number(el.querySelector('#f-paginas').value||0),
-        temas: el.querySelector('#f-temas').value.split(',').map(s=>s.trim()).filter(Boolean),
-        origem: el.querySelector('#f-origem').value.trim(),
-        local: el.querySelector('#f-local').value.trim(),
-        coletanea: wrap.classList.contains('hidden') ? undefined : el.querySelector('#f-coletanea').value
+        autor: el.querySelector('#f-autor').value.trim() || null,
+        editora: el.querySelector('#f-editora').value.trim() || null,
+        edicao: el.querySelector('#f-edicao').value.trim() || null,
+        ano: el.querySelector('#f-ano').value.trim() || null,
+        paginas: Number(el.querySelector('#f-paginas').value||0) || null,
+        temas: el.querySelector('#f-temas').value.split(',').map(s=>s.trim()).filter(Boolean) || null,
+        origem: el.querySelector('#f-origem').value.trim() || null,
+        local: el.querySelector('#f-local').value.trim() || null,
+        coletanea: wrap.classList.contains('hidden') ? null : el.querySelector('#f-coletanea').value || null
       };
       if(!updated.titulo){ alert('Título é obrigatório'); return; }
-      await firestore.set(app.db, app.uid, 'books', updated.id, updated);
+      
+      const dataToSave = Object.fromEntries(
+        Object.entries(updated).filter(([_, v]) => v !== null)
+      );
+
+      await firestore.set(app.db, app.uid, 'books', updated.id, dataToSave);
       modal.close(); render(); app.toast('Salvo');
     });
   }

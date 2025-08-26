@@ -33,11 +33,11 @@
     </div>
   </header>
 
-  <main class="main">
+  <main class="main" id="main-content">
     <div id="page"></div>
   </main>
 
-  <nav class="bottomnav">
+  <nav class="bottomnav" id="bottom-nav">
     <div class="inner">
       <button class="navbtn" data-route="acervo">📚<span class="badge">Acervo</span></button>
       <button class="navbtn" data-route="leituras">✒️<span class="badge">Leituras</span></button>
@@ -50,10 +50,30 @@
   <div id="toast" class="toast hidden"><div></div></div>
 </div>
 
+<div class="modal-back hidden" id="login-modal">
+  <div class="modal fade-in">
+    <div class="modal-body grid" style="text-align:center;">
+      <div style="font-size:20px; font-weight:700">Bem-vindo ao BiblioFlow!</div>
+      <div class="row" style="margin-top:10px; justify-content:center">
+          <button class="btn btn-primary" id="btn-google-login">Login com Google</button>
+      </div>
+      <div class="badge" style="margin-top:10px">ou use seu e-mail</div>
+      <div class="field"><label class="label">Email</label><input id="login-email" class="input" type="email"></div>
+      <div class="field"><label class="label">Senha</label><input id="login-senha" class="input" type="password"></div>
+      <div class="row" style="justify-content:space-between">
+        <button class="btn btn-ghost" id="btn-cadastro">Criar Conta</button>
+        <button class="btn btn-cta" id="btn-entrar">Entrar</button>
+      </div>
+      <div class="badge" id="login-status" style="margin-top:8px"></div>
+    </div>
+  </div>
+</div>
+
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, getDoc, collection, getDocs, setDoc, query, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { BiblioFlow } from './js/app.js';
 
 // Preencha com sua configuração do Firebase
@@ -70,23 +90,76 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+const loginModal = document.getElementById('login-modal');
+const mainContent = document.getElementById('main-content');
+const bottomNav = document.getElementById('bottom-nav');
+
 onAuthStateChanged(auth, async (user) => {
   if (user) {
+    loginModal.classList.add('hidden');
+    mainContent.classList.remove('hidden');
+    bottomNav.classList.remove('hidden');
     document.getElementById('brand').style.display = 'flex';
-    document.querySelector('.bottomnav').style.display = 'grid';
+    document.getElementById('btn-timer').style.display = 'flex';
+    document.getElementById('btn-streaks').style.display = 'flex';
+    document.getElementById('btn-menu').style.display = 'flex';
     document.getElementById('menu-sair').style.display = 'flex';
     document.getElementById('menu-perfil').style.display = 'flex';
     document.getElementById('menu-config').style.display = 'flex';
     await BiblioFlow.init(db, user.uid);
   } else {
+    loginModal.classList.remove('hidden');
+    mainContent.classList.add('hidden');
+    bottomNav.classList.add('hidden');
     document.getElementById('brand').style.display = 'none';
-    document.querySelector('.bottomnav').style.display = 'none';
+    document.getElementById('btn-timer').style.display = 'none';
+    document.getElementById('btn-streaks').style.display = 'none';
+    document.getElementById('btn-menu').style.display = 'none';
     document.getElementById('menu-sair').style.display = 'none';
     document.getElementById('menu-perfil').style.display = 'none';
     document.getElementById('menu-config').style.display = 'none';
-    await BiblioFlow.init(db, null);
   }
 });
+
+// Ações do modal de login
+const loginStatus = document.getElementById('login-status');
+const loginEmail = document.getElementById('login-email');
+const loginSenha = document.getElementById('login-senha');
+
+document.getElementById('btn-google-login').addEventListener('click', async () => {
+    try {
+        const provider = new GoogleAuthProvider();
+        await signInWithPopup(auth, provider);
+        loginStatus.textContent = '';
+    } catch (e) {
+        loginStatus.textContent = 'Erro ao fazer login com Google.';
+        console.error(e);
+    }
+});
+
+document.getElementById('btn-entrar').addEventListener('click', async () => {
+    try {
+        loginStatus.textContent = 'Entrando...';
+        await signInWithEmailAndPassword(auth, loginEmail.value, loginSenha.value);
+        loginStatus.textContent = '';
+    } catch (e) {
+        loginStatus.textContent = 'Erro ao entrar. Verifique email/senha.';
+        console.error(e);
+    }
+});
+
+document.getElementById('btn-cadastro').addEventListener('click', async () => {
+    try {
+        loginStatus.textContent = 'Criando conta...';
+        await createUserWithEmailAndPassword(auth, loginEmail.value, loginSenha.value);
+        loginStatus.textContent = 'Conta criada! Você já está logado.';
+    } catch (e) {
+        loginStatus.textContent = 'Erro ao criar conta. Tente novamente.';
+        console.error(e);
+    }
+});
 </script>
+
+<script type="module" src="./js/app.js"></script>
 </body>
 </html>

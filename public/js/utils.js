@@ -1,50 +1,112 @@
-// Utils & storage
-import { collection, query, getDocs, setDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-export function computeDays(paginas, porDia){
-  const p = Math.max(0, Number(paginas)||0);
-  const d = Math.max(1, Number(porDia)||0);
-  return Math.max(1, Math.ceil(p/d));
-}
-export function computePagesPerDay(paginas, dias){
-  const p = Math.max(0, Number(paginas)||0);
-  const d = Math.max(1, Number(dias)||0);
-  return p === 0 ? 0 : Math.max(1, Math.ceil(p/d));
-}
-export const store = {
-  get(key, fallback){
-    try{
-      const v = localStorage.getItem(key);
-      return v ? JSON.parse(v) : structuredClone(fallback);
-    }catch{ return structuredClone(fallback); }
+import {
+  getFirestore,
+  collection,
+  doc,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  query,
+  where,
+  limit
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut,
+  deleteUser,
+  updateProfile
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firestore = {
+  get: async (db, uid, collectionName) => {
+    const colRef = collection(db, "users", uid, collectionName);
+    const snapshot = await getDocs(colRef);
+    return snapshot.docs.map((d) => ({
+      id: d.id,
+      ...d.data()
+    }));
   },
-  set(key, val){
-    localStorage.setItem(key, JSON.stringify(val));
+  add: async (db, uid, collectionName, data) => {
+    const colRef = collection(db, "users", uid, collectionName);
+    const docRef = await addDoc(colRef, data);
+    return docRef.id;
+  },
+  update: async (db, uid, collectionName, id, data) => {
+    const docRef = doc(db, "users", uid, collectionName, id);
+    await updateDoc(docRef, data);
+  },
+  getOne: async (db, uid, collectionName, id) => {
+    const docRef = doc(db, "users", uid, collectionName, id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return {
+        id: docSnap.id,
+        ...docSnap.data()
+      };
+    } else {
+      return null;
+    }
+  },
+  // Nova função para excluir documentos
+  delete: async (db, uid, collectionName, id) => {
+    const docRef = doc(db, "users", uid, collectionName, id);
+    await deleteDoc(docRef);
+  },
+  // Nova função para buscar documentos por query
+  query: async (db, collectionName, q) => {
+    const colRef = collection(db, collectionName);
+    const qSnap = await getDocs(query(colRef, ...q));
+    return qSnap.docs.map(d => ({ id: d.id, ...d.data() }));
   }
 };
-export function uid(prefix='id'){ return prefix + '_' + Math.random().toString(36).slice(2,9); }
-export function formatDate(d){ try{ return new Date(d).toISOString().slice(0,10); }catch{ return d; } }
 
-// Firebase Functions
-export const firestore = {
-  async getAll(db, uid, collectionName){
-    if(!uid) return [];
-    const q = query(collection(db, 'users', uid, collectionName));
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+const auth = {
+  checkAuthState: (app, callback) => {
+    onAuthStateChanged(app.auth, (user) => {
+      if (user) {
+        app.uid = user.uid;
+        app.uname = user.displayName;
+        app.uphoto = user.photoURL;
+      } else {
+        app.uid = null;
+        app.uname = null;
+        app.uphoto = null;
+      }
+      callback(user);
+    });
   },
-  async set(db, uid, collectionName, id, data){
-    if(!uid) return;
-    await setDoc(doc(db, 'users', uid, collectionName, id), data);
+  signIn: (app) => {
+    signInWithPopup(app.auth, new GoogleAuthProvider());
   },
-  async add(db, uid, collectionName, data){
-    if(!uid) return null;
-    const newDoc = doc(collection(db, 'users', uid, collectionName));
-    await setDoc(newDoc, data);
-    return newDoc.id;
+  signOut: (app) => {
+    signOut(app.auth);
   },
-  async del(db, uid, collectionName, id){
-    if(!uid) return;
-    await deleteDoc(doc(db, 'users', uid, collectionName, id));
+  // Nova função para excluir a conta do usuário
+  deleteAccount: async (app) => {
+    await deleteUser(app.auth.currentUser);
+  },
+  // Nova função para atualizar o perfil do usuário
+  updateProfile: async (app, newProfile) => {
+    await updateProfile(app.auth.currentUser, newProfile);
   }
 };
 
+const uid = () => {
+  let a = new Uint32Array(3);
+  window.crypto.getRandomValues(a);
+  return (
+    performance.now().toString(36) +
+    Array.from(a)
+    .map((d) => d.toString(36))
+    .join("")
+  ).replace(/\./g, "");
+};
+
+export {
+  firestore,
+  auth,
+  uid
+};

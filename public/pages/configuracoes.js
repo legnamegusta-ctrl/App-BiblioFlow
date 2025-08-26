@@ -1,4 +1,3 @@
-
 export async function initPage(app){
   document.getElementById('btn-gerar').addEventListener('click', ()=> app.toast('Código do acervo: acv_'+Math.random().toString(36).slice(2,7)));
   document.getElementById('btn-vincular').addEventListener('click', ()=> app.toast('Vinculado (demo)'));
@@ -11,4 +10,22 @@ export async function initPage(app){
     URL.revokeObjectURL(url);
   });
   document.getElementById('btn-excluir').addEventListener('click', ()=> app.toast('Conta excluída (demo)'));
+
+  const pwaCard = document.getElementById('card-pwa');
+  const pwaInstallBtn = document.getElementById('btn-pwa-install');
+  if(pwaInstallBtn){
+    pwaInstallBtn.addEventListener('click', async ()=>{
+      if(window.deferredPrompt){
+        window.deferredPrompt.prompt();
+        const { outcome } = await window.deferredPrompt.userChoice;
+        if(outcome === 'accepted'){
+          app.toast('Instalação aceita!');
+        }else{
+          app.toast('Instalação cancelada!');
+        }
+        window.deferredPrompt = null;
+        pwaCard.classList.add('hidden');
+      }
+    });
+  }
 }
