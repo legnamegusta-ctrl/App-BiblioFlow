@@ -1,4 +1,5 @@
 import { firestore, auth, uid } from '../js/utils.js';
+import { where, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 export function initPage(app){
   const btnSalvar = document.getElementById('btn-salvar-perfil');
@@ -8,7 +9,7 @@ export function initPage(app){
   const btnExcluirConta = document.getElementById('btn-excluir-conta');
 
   // Funcionalidade de Excluir Conta
-  btnExcluirConta.addEventListener('click', () => {
+  if (btnExcluirConta) btnExcluirConta.addEventListener('click', () => {
     app.openModal('Excluir Conta', `
       <div class="field">
         <label class="label">Confirme sua senha para continuar</label>
@@ -39,7 +40,7 @@ export function initPage(app){
   });
 
   // Funcionalidade de Gerar Código de Acervo
-  btnGerarCodigo.addEventListener('click', async () => {
+  if (btnGerarCodigo) btnGerarCodigo.addEventListener('click', async () => {
     const myLibrary = await firestore.get(app.db, app.uid, 'library');
     if(myLibrary.length === 0){
         app.toast('Seu acervo está vazio!');
@@ -67,7 +68,7 @@ export function initPage(app){
   });
 
   // Funcionalidade de Vincular Código
-  btnVincularCodigo.addEventListener('click', () => {
+  if (btnVincularCodigo) btnVincularCodigo.addEventListener('click', () => {
     app.openModal('Vincular Acervo', `
       <form id="frm-vincular-codigo">
         <div class="field">
@@ -100,7 +101,7 @@ export function initPage(app){
   });
 
   // Funcionalidade de Importar
-  btnImportar.addEventListener('click', () => {
+  if (btnImportar) btnImportar.addEventListener('click', () => {
     app.openModal('Importar Dados', `
       <form id="frm-importar">
         <div class="field">

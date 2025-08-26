@@ -6,7 +6,8 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
-  query
+  query,
+  setDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {
   onAuthStateChanged,
@@ -49,6 +50,10 @@ const store = {
 export { store };
 export function uid(prefix='id'){ return prefix + '_' + Math.random().toString(36).slice(2,9); }
 export function formatDate(d){ try{ return new Date(d).toISOString().slice(0,10); }catch{ return d; } }
+
+// Streak helpers
+const streakStatus = ['Medalha de Bronze', 'Medalha de Prata', 'Medalha de Ouro', 'Imortal'];
+const statusMilestones = [7, 30, 90, 365];
 
 const firestore = {
   get: async (db, uid, collectionName) => {
@@ -93,6 +98,13 @@ const firestore = {
   }
 };
 
+// Backwards compatibility helpers
+firestore.getAll = firestore.get;
+firestore.set = async (db, uid, collectionName, id, data) => {
+  const docRef = doc(db, "users", uid, collectionName, id);
+  await setDoc(docRef, data);
+};
+
 const auth = {
   checkAuthState: (app, callback) => {
     onAuthStateChanged(app.auth, (user) => {
@@ -126,5 +138,7 @@ const auth = {
 
 export {
   firestore,
-  auth
+  auth,
+  streakStatus,
+  statusMilestones
 }; // uid is exported above
